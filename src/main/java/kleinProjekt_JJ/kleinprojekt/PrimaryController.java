@@ -150,7 +150,7 @@ public class PrimaryController {
 	            JOptionPane.showMessageDialog(null, "Decryption failed. Please try again.");
 	        }
 	    		
-	        k
+	        
 	    }
 
 	    @FXML

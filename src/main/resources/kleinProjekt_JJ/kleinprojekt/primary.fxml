@@ -43,7 +43,7 @@
                   <Insets bottom="5.0" top="5.0" />
                </padding>
             </GridPane>
-            <CheckBox fx:id="cbPath" mnemonicParsing="false" onAction="#onCheckBox" text="Destionation Path same as file's path" />
+            <CheckBox fx:id="cbPath" mnemonicParsing="false" onAction="#onCheckBox" text="Overwrite orginall file" />
             <HBox prefHeight="36.0" prefWidth="400.0" spacing="5.0" VBox.vgrow="ALWAYS">
                <children>
                   <Button fx:id="btnEncrypt" mnemonicParsing="false" onAction="#onEncrypt" prefHeight="25.0" prefWidth="89.0" text="Encrypt" />
