@@ -55,7 +55,7 @@
                   <Label layoutX="160.0" layoutY="72.0" text="...or drop file here" />
                </children>
             </Pane>
-            <Label fx:id="lbChecksumm" prefHeight="17.0" prefWidth="81.0" text="File check sum" />
+            <Label fx:id="lbChecksumm" prefHeight="17.0" prefWidth="81.0" text="File integrity" />
             <Label fx:id="lbSum1" visible="false" />
             <Label fx:id="lbSum2" visible="false" />
          </children>
