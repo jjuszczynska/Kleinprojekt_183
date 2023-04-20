@@ -34,7 +34,7 @@
                   <Label text="Path" />
                   <Label text="Destination" GridPane.rowIndex="1" />
                   <PasswordField fx:id="pfPass" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
-                  <Label text="Password" GridPane.rowIndex="2" />
+                  <Label fx:id="lbPass" text="Password" GridPane.rowIndex="2" />
                </children>
                <VBox.margin>
                   <Insets />
@@ -56,8 +56,8 @@
                </children>
             </Pane>
             <Label fx:id="lbChecksumm" prefHeight="17.0" prefWidth="81.0" text="File check sum" />
-            <Label fx:id="lbSum1" visible="false" wrapText="true" />
-            <Label fx:id="lbSum2" visible="false" wrapText="true" />
+            <Label fx:id="lbSum1" visible="false" />
+            <Label fx:id="lbSum2" visible="false" />
          </children>
          <padding>
             <Insets bottom="50.0" left="100.0" right="100.0" top="50.0" />

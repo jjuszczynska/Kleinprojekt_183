@@ -2,21 +2,19 @@ package kleinProjekt_JJ.kleinprojekt;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JOptionPane;
@@ -62,8 +60,10 @@ public class PrimaryController {
 
 	    @FXML
 	    private Label lbSum2;
-
 	    
+	    @FXML
+	    private Label lbChecksumm;
+    
 
 	    @FXML
 	    void onDragDropped(DragEvent event) {
@@ -92,128 +92,128 @@ public class PrimaryController {
 	    @FXML
 	    void onDecrypt(ActionEvent event) throws Exception {
 	    	String filePath = tfPath.getText();
-	        String password = pfPass.getText();
-	        File inputFile = new File(filePath);
+	    	String password = pfPass.getText();
+	    	File inputFile = new File(filePath);
+	    	String outputPath = cbPath.isSelected() ? tfPath.getText() : tfDestination.getText();
 
-	        // validate password and file path
-	        if (!validatePass(password)) {
-	            JOptionPane.showMessageDialog(null, "Invalid password. Please try again.");
-	            return;
-	        }
+	    	// validate password and file path
+	    	if (!validatePass(password)) {
+	    	    JOptionPane.showMessageDialog(null, "Invalid password. Please try again.\nPassword must have at least one uppercase letter,\none lowercase letter, one digit,\nand one special character among @#$%^&+=, be 8-20 characters long, and contain no whitespace.");
+	    	    
+	    	    return;
+	    	}
 
-	        if (!inputFile.exists()) {
-	            JOptionPane.showMessageDialog(null, "Invalid path. Please try again.");
-	            return;
-	        }
-	        lbSum1.setVisible(true);
-    	    lbSum1.setText("Before: " + checkSumm(filePath));
+	    	if (!inputFile.exists()) {
+	    	    JOptionPane.showMessageDialog(null, "Invalid path. Please try again.");
+	    	    return;
+	    	}
+	    	
+	    	if(!cbPath.isSelected() && tfDestination.getText()=="") {
+	    		JOptionPane.showMessageDialog(null, "Destination path was not selected.\nChoose destination Path\nor check to override the orginal file");
+	    	    return;
+	    	}
+	    	
+	    	// read the salt and encrypted bytes from the input file
+	    	byte[] salt = new byte[16];
+	    	byte[] encryptedBytes;
 
-	        // perform decryption
-	        try {
-	            // read the input file
-	            byte[] inputBytes = Files.readAllBytes(inputFile.toPath());
+	    	try (FileInputStream fis = new FileInputStream(inputFile)) {
+	    	    fis.read(salt);
+	    	    encryptedBytes = fis.readAllBytes();
+	    	
+	    	SecretKey secretKey=generateKey(password, salt);
 
-	            // split the input bytes into the initialization vector and encrypted data
-	            byte[] iv = Arrays.copyOfRange(inputBytes, 0, 16);
-	            byte[] encryptedBytes = Arrays.copyOfRange(inputBytes, 16, inputBytes.length);
+	    	// initialize the cipher in decrypt mode with ECB mode
+	    	Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+	    	cipher.init(Cipher.DECRYPT_MODE, secretKey);
 
-	            // generate a secret key from the password
-	            byte[] salt = new byte[16];
-	            SecureRandom random = new SecureRandom();
-	            random.nextBytes(salt);
-	            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-	            KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);
-	            SecretKey tmp = factory.generateSecret(spec);
-	            SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+	    	// decrypt the encrypted bytes
+	    	byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
 
-	            // initialize the cipher in decrypt mode
-	            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-	            cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
+	    	// write the decrypted bytes to a file
+	    	
+	    	File outputFile = new File(outputPath);
+	    	FileOutputStream fos = new FileOutputStream(outputFile);
+	    	fos.write(decryptedBytes);
+	    	fos.close();
 
-	            // decrypt the input bytes
-	            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+	    	lbSum2.setVisible(true);
+	    	lbSum2.setText("After: "+checkSumm(outputPath));
 
-	            // write the decrypted bytes to a file
-	            String outputPath = cbPath.isSelected() ? tfPath.getText() : tfDestination.getText();
-	            File outputFile = new File(outputPath);
-	            FileOutputStream fos = new FileOutputStream(outputFile);
-	            fos.write(decryptedBytes);
-	            fos.close();
-	            
-	            lbSum2.setVisible(true);
-	    	    lbSum2.setText("After: " + checkSumm(outputPath));
+	    	// display success message
+	    	JOptionPane.showMessageDialog(null, "File decrypted successfully.");}
+	    	catch (Exception e) {
+	    		JOptionPane.showMessageDialog(null, "Decryption failed.");
+	    	}
 
-	            // display success message
-	            JOptionPane.showMessageDialog(null, "File decrypted successfully.");
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	            JOptionPane.showMessageDialog(null, "Decryption failed. Please try again.");
-	        }
 	    		
 	        
 	    }
 
 	    @FXML
 	    void onEncrypt(ActionEvent event) throws Exception {
-	    	 String filePath = tfPath.getText();
-	    	    String password = pfPass.getText();
-	    	    File inputFile = new File(filePath);
+	    	String filePath = tfPath.getText();
+	    	String password = pfPass.getText();
+	    	File inputFile = new File(filePath);
+	    	
+	    	
 
-	    	    // validate password and file path
-	    	    if (!validatePass(password)) {
-	    	        JOptionPane.showMessageDialog(null, "Invalid password. Please try again.");
-	    	        return;
-	    	    }
+	    	// validate password and file path
+	    	if (!validatePass(password)) {
+	    	    JOptionPane.showMessageDialog(null, "Invalid password. Please try again.\nPassword must have at least one uppercase letter,\none lowercase letter, one digit,\nand one special character among @#$%^&+=, be 8-20 characters long, and contain no whitespace.");
+	    	    return;
+	    	}
 
-	    	    if (!inputFile.exists()) {
-	    	        JOptionPane.showMessageDialog(null, "Invalid path. Please try again.");
-	    	        return;
-	    	    }
-	    	    lbSum1.setVisible(true);
-	    	    lbSum1.setText("Before: " + checkSumm(filePath));
-	    	    // perform encryption
-	    	    try {
-	    	        // read the input file
-	    	        byte[] inputBytes = Files.readAllBytes(inputFile.toPath());
+	    	if (!inputFile.exists()) {
+	    	    JOptionPane.showMessageDialog(null, "Invalid path. Please try again.");
+	    	    return;
+	    	}
+	    	
+	    	if(!cbPath.isSelected() && tfDestination.getText()=="") {
+	    		JOptionPane.showMessageDialog(null, "Destination path was not selected.\nChoose destination Path\nor check to override the orginal file");
+	    	    return;
+	    	}
+	    		
+	    	
+	    	lbSum1.setVisible(true);
+	    	lbSum1.setText("Before: " + checkSumm(filePath));
 
-	    	        // generate a salt and secret key from the password using PBKDF2 with HMAC SHA-256
-	    	        byte[] salt = new byte[16];
-	    	        SecureRandom random = new SecureRandom();
-	    	        random.nextBytes(salt);
+	    	// perform encryption
+	    	try {
+	    	    // read the input file
+	    	    byte[] inputBytes = Files.readAllBytes(inputFile.toPath());
+	    	    
+	    	    byte[] salt = new byte[16];
+	    	    SecureRandom random = new SecureRandom();
+	    	    random.nextBytes(salt);
+	    	    
+	    	    SecretKey secretKey=generateKey(password, salt);
+	    	    
+	    	    // initialize the cipher in encrypt mode with ECB mode
+	    	    Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+	    	    cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 
-	    	        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-	    	        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);
-	    	        SecretKey tmp = factory.generateSecret(spec);
-	    	        SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+	    	    // encrypt the input bytes
+	    	    byte[] encryptedBytes = cipher.doFinal(inputBytes);
 
-	    	        // generate a random initialization vector
-	    	        byte[] iv = new byte[16];
-	    	        random.nextBytes(iv);
+	    	    // write the salt and encrypted bytes to a file
+	    	    String outputPath = cbPath.isSelected() ? tfPath.getText() : tfDestination.getText();
+	    	    File outputFile = new File(outputPath);
+	    	    FileOutputStream fos = new FileOutputStream(outputFile);
+	    	    fos.write(salt);
+	    	    fos.write(encryptedBytes);
+	    	    fos.close();
+	    	    
+	    	    lbSum2.setVisible(true);
+	    	    lbSum2.setText("After: "+checkSumm(outputPath));
 
-	    	        // initialize the cipher in encrypt mode
-	    	        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-	    	        cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
+	    	    // display success message
+	    	    JOptionPane.showMessageDialog(null, "File encrypted successfully.");
+	    	} catch (Exception e) {
+	    	    e.printStackTrace();
+	    	    JOptionPane.showMessageDialog(null, "Encryption failed. Please try again.");
+	    	}
 
-	    	        // encrypt the input bytes
-	    	        byte[] encryptedBytes = cipher.doFinal(inputBytes);
-
-	    	        // write the salt, IV, and encrypted bytes to a file
-	    	        String outputPath = cbPath.isSelected() ? tfPath.getText() : tfDestination.getText();
-	    	        File outputFile = new File(outputPath);
-	    	        FileOutputStream fos = new FileOutputStream(outputFile);
-	    	        fos.write(salt);
-	    	        fos.write(iv);
-	    	        fos.write(encryptedBytes);
-	    	        fos.close();
-	    	        
-	    	        lbSum2.setVisible(true);
-	    	        lbSum2.setText("After: "+checkSumm(outputPath));
-	    	        // display success message
-	    	        JOptionPane.showMessageDialog(null, "File encrypted successfully.");
-	    	    } catch (Exception e) {
-	    	        e.printStackTrace();
-	    	        JOptionPane.showMessageDialog(null, "Encryption failed. Please try again.");
-	    	    }
 	    }
 	    
 	    
@@ -260,6 +260,15 @@ public class PrimaryController {
     		}
     		return sb.toString();
 	    	
+	    }
+	    
+	    private SecretKey generateKey(String key, byte[] salt) throws Exception {
+	    	
+    	    SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+    	    KeySpec spec = new PBEKeySpec(key.toCharArray(), salt, 10000, 256);
+    	    SecretKey tmp = factory.generateSecret(spec);
+    	    SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+    	    return secretKey;
 	    }
 	    
 	    
