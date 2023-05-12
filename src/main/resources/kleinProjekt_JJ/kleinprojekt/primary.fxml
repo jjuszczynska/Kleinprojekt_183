@@ -13,10 +13,11 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="kleinProjekt_JJ.kleinprojekt.PrimaryController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="615.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="kleinProjekt_JJ.kleinprojekt.PrimaryController">
    <children>
-      <VBox prefHeight="400.0" prefWidth="600.0" spacing="5.0">
+      <VBox prefHeight="615.0" prefWidth="700.0" spacing="5.0">
          <children>
             <GridPane prefHeight="63.0" prefWidth="401.0" vgap="20.0" VBox.vgrow="ALWAYS">
               <columnConstraints>
@@ -50,14 +51,50 @@
                   <Button fx:id="btnDecrypt" mnemonicParsing="false" onAction="#onDecrypt" prefHeight="25.0" prefWidth="90.0" text="Decrypt" />
                </children>
             </HBox>
-            <Pane fx:id="pDrop" onDragDropped="#onDragDropped" onDragOver="#onDragOver" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+            <Pane fx:id="pDrop" onDragDropped="#onDragDropped" onDragOver="#onDragOver" prefHeight="127.0" prefWidth="400.0" VBox.vgrow="ALWAYS">
                <children>
-                  <Label layoutX="160.0" layoutY="72.0" text="...or drop file here" />
+                  <Label alignment="CENTER" layoutX="203.0" layoutY="56.0" text="...or drop file here" />
                </children>
             </Pane>
             <Label fx:id="lbChecksumm" prefHeight="17.0" prefWidth="81.0" text="File integrity" />
-            <Label fx:id="lbSum1" visible="false" />
-            <Label fx:id="lbSum2" visible="false" />
+            <Label fx:id="lbSum1" prefHeight="17.0" prefWidth="495.0" visible="false" wrapText="true" />
+            <CheckBox fx:id="cbCustomRegex" mnemonicParsing="false" onAction="#onCbCustomRegex" text="Custom Regex" />
+            <HBox prefHeight="32.0" prefWidth="400.0" spacing="5.0">
+               <children>
+                  <TextField fx:id="tfCostomRegex" disable="true" prefHeight="25.0" prefWidth="434.0" />
+                  <Button fx:id="btnConfirmRegex" disable="true" mnemonicParsing="false" onAction="#onConfirm" text="Confirm" />
+               </children>
+            </HBox>
+            <Label text="Default password requirements:">
+               <font>
+                  <Font size="10.0" />
+               </font>
+            </Label>
+            <Label prefHeight="17.0" prefWidth="160.0" text="-at least one uppercase letter">
+               <font>
+                  <Font size="10.0" />
+               </font>
+            </Label>
+            <Label prefHeight="17.0" prefWidth="160.0" text="-at least one lowercase letter">
+               <font>
+                  <Font size="10.0" />
+               </font>
+            </Label>
+            <Label prefHeight="17.0" prefWidth="160.0" text="-at least one digit">
+               <font>
+                  <Font size="10.0" />
+               </font>
+            </Label>
+            <Label prefHeight="17.0" prefWidth="160.0" text="-at least one character:  @#$%^&amp;+=">
+               <font>
+                  <Font size="10.0" />
+               </font>
+            </Label>
+            <Label prefHeight="17.0" prefWidth="160.0" text="-be 8-20 characters long">
+               <font>
+                  <Font size="10.0" />
+               </font>
+            </Label>
          </children>
          <padding>
             <Insets bottom="50.0" left="100.0" right="100.0" top="50.0" />
