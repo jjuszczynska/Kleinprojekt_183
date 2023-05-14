@@ -1,3 +1,11 @@
+/**
+ * @author Julia Juszczynska
+ * @version 2.0
+ * @date 14.05.2023
+ * 
+ * Programm to encrypt and decrypt files
+ */
+
 package kleinProjekt_JJ.kleinprojekt;
 
 import java.io.File;
@@ -68,7 +76,9 @@ public class PrimaryController {
 
     @FXML
     private Button btnConfirmRegex;
-
+    
+    
+    //drag&drop methods
     @FXML
     private void onDragDropped(DragEvent event) {
         Dragboard db = event.getDragboard();
@@ -83,6 +93,7 @@ public class PrimaryController {
         event.consume();
     }
 
+    
     @FXML
     private void onDragOver(DragEvent event) {
         if (event.getGestureSource() != pDrop) {
@@ -92,7 +103,9 @@ public class PrimaryController {
             }
         }
     }
-
+    
+    
+    //decryption
     @FXML
     private void onDecrypt(ActionEvent event) throws Exception {
         String filePath = tfPath.getText();
@@ -153,7 +166,8 @@ public class PrimaryController {
         }
 
     }
-
+    
+    //encryption
     @FXML
     private void onEncrypt(ActionEvent event) throws Exception {
         String filePath = tfPath.getText();
@@ -178,11 +192,7 @@ public class PrimaryController {
             return;
         }
 
-        // checksum before encryption
-        lbSum1.setVisible(true);
-        lbSum1.setText("Checksum: " + checkSumm(filePath));
-        System.out.println(checkSumm(filePath));
-
+        
         try {
             // read the input file
             byte[] inputBytes = Files.readAllBytes(inputFile.toPath());
@@ -198,7 +208,7 @@ public class PrimaryController {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 
-            // encription
+            // encryption
             byte[] encryptedBytes = cipher.doFinal(inputBytes);
 
             // write the salt and encrypted bytes to a file
@@ -208,6 +218,11 @@ public class PrimaryController {
             fos.write(salt);
             fos.write(encryptedBytes);
             fos.close();
+            
+            // checksum
+            lbSum1.setVisible(true);
+            lbSum1.setText("Checksum: " + checkSumm(filePath));
+            System.out.println(checkSumm(filePath));
 
             // display success message
             JOptionPane.showMessageDialog(null, "File encrypted successfully.");
@@ -231,7 +246,8 @@ public class PrimaryController {
         tfDestination.setDisable(true);
 
     }
-
+    
+    //validate pass
     private boolean validatePass(String pass) {
         String regexToCheck = PASSWORD_REGEX;
         if (cbCustomRegex.isSelected()) {
@@ -275,7 +291,8 @@ public class PrimaryController {
         SecretKey secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
         return secretKey;
     }
-
+    
+    //deactivate/activate fields if cb activ/inactiv
     @FXML
     private void onCbCustomRegex(ActionEvent event) {
         if (!cbCustomRegex.isSelected()) {
@@ -290,7 +307,8 @@ public class PrimaryController {
         btnConfirmRegex.setDisable(false);
 
     }
-
+    
+    //check if regex is valid; 
     @FXML
     private void onConfirm(ActionEvent event) {
 
